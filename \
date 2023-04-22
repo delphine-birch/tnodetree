@@ -1,0 +1,60 @@
+slotmap::new_key_type!{ struct NodeKey; }
+
+pub struct Node<I, T> 
+where T : Default
+{
+    item: I,
+    relative_transform: T,
+    absolute_transform: T,
+    children: Vec<NodeKey>,
+}
+
+pub struct NodeTree<I, T> 
+where T : Default
+{
+    pub nodes: slotmap::DenseSlotMap<NodeKey, Node<I, T>>,
+    pub root: NodeKey,
+}
+impl<I, T> NodeTree<I, T> 
+where T : Default
+{
+    pub fn new(root_item: I) -> Self {
+        let nodes = slotmap::DenseSlotMap::with_key();
+        let root = nodes.insert(Node { item: root_item, relative_transform: T::default(), absolute_transform: T::default(), children: vec![] });
+        Self { nodes, root }
+    }
+
+}
+
+struct NodeIter<'r, I, T>
+where T : Default {
+    nodes: &'r slotmap::DenseSlotMap<NodeKey, Node<I, T>>,
+    stack: Vec<NodeKey>,
+    counted: Vec<NodeKey>,
+}
+
+impl<'r, I, T> Iterator for NodeIter<'r, I, T>
+where T : Default {
+    type Item = &'r Node<I, T>;
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.stack.pop() {
+            Some(current) => {
+                match self.counted.contains(&current) {
+                    true => { log::error!("Node tree is cyclic."); None },
+                    false => {
+                        match self.nodes.get(current) {
+                            Some(node) => {
+                                for child in node.children {
+                                    stack.push(child);
+                                }
+                                Some(node)
+                            },
+                            None => { log::error!("Key pointing to non-existent node?"); None },
+                        }
+                    }
+                }
+            },
+            None => None,
+        }
+    }
+}

@@ -1,0 +1,13 @@
+[package]
+name = "tnodetree"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Simple transform-based node tree with relative and absolute transforms, generic over type of transform and item contained."
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log = "0.4.17"
+slotmap = "1.0.6"
